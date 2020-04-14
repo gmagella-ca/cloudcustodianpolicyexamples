@@ -1,0 +1,49 @@
+vars:
+
+  notification_actionEmail: &notify_actionEmail
+  - type: notify
+    template: better_default
+    to:
+      - resource-owner
+      - example@email.com
+    transport:
+      type: sqs
+      region: us-east-1
+      queue: CustodianSQSMailer
+
+  notification_actionSlack: &notify_actionSlack
+  - type: notify
+    slack_template: better_slack
+    to:
+      - https://hooks.slack.com/services/AAA/BBB/CCC
+    transport:
+      type: sqs
+      region: us-east-1
+      queue: CustodianSQSMailer
+      
+policies:
+    #This policy has multi-step, continue in /c7n-org-policies/organization-policies.
+- name: ec2-tag-compliance-1
+  resource: ec2
+  mode:
+    type: cloudtrail
+    role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    member-role: arn:aws:iam::{account_id}:role/CloudCustodianAdminRole
+    events:
+      - RunInstances
+  filters:
+    - not:
+      - type: value
+        key: "tag:phone"
+        op: regex
+        value: '^\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$'
+  actions:
+    - << : *notify_actionEmail
+      subject: "Instance launched with invalid phone number tag! {{ account_id }} - {{ region }} "
+    - << : *notify_actionSlack
+      violation_desc: "All instances should have phone tag with correct phone number."
+      action_desc: "Instance will be stopped in 14 days if still not compliant."
+    - type: mark-for-op
+      tag: c7n_impropertag
+      op: stop
+      days: 14

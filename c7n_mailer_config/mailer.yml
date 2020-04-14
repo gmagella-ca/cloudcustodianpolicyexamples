@@ -1,0 +1,14 @@
+queue_url: https://sqs.us-east-1.amazonaws.com/<ACCOUNTID>/CustodianSQSMailer
+role: arn:aws:iam::<ACCOUNTID>:role/CloudCustodianMailerRole
+from_address: email@example.com
+region: us-east-1
+ses_region: us-east-1
+
+#queue_url: https://sqs.eu-central-1.amazonaws.com/XX/CustodianSQSMailer 
+#role: arn:aws:iam::XX:role/CloudCustodianAdminRole 
+#from_address: email@example.com
+#region: us-east-1 
+#smtp_server: email-smtp.eu-west-1.amazonaws.com 
+#smtp_port: 587 
+#smtp_username: XX 
+#smtp_password: XX 
